@@ -13,7 +13,8 @@ public class Review {
   private static HashMap<String, Double> sentiment = new HashMap<String, Double>();
   private static ArrayList<String> posAdjectives = new ArrayList<String>();
   private static ArrayList<String> negAdjectives = new ArrayList<String>();
- 
+  private static ArrayList<String> gayreview = new ArrayList<String>();
+  private static ArrayList<String> straightreview = new ArrayList<String>();
   
   private static final String SPACE = " ";
   
@@ -33,18 +34,18 @@ public class Review {
   
   
   //read in the positive adjectives in postiveAdjectives.txt
-     try {
-      Scanner input = new Scanner(new File("positiveAdjectives.txt"));
-      while(input.hasNextLine()){
-        String temp = input.nextLine().trim();
-        System.out.println(temp);
-        posAdjectives.add(temp);
-      }
-      input.close();
+  try {
+    Scanner input = new Scanner(new File("positiveAdjectives.txt"));
+    while(input.hasNextLine()){
+      String temp = input.nextLine().trim();
+      System.out.println(temp);
+      posAdjectives.add(temp);
     }
-    catch(Exception e){
-      System.out.println("Error reading or parsing postitiveAdjectives.txt\n" + e);
-    }   
+    input.close();
+  }
+  catch(Exception e){
+    System.out.println("Error reading or parsing postitiveAdjectives.txt\n" + e);
+  }   
  
   //read in the negative adjectives in negativeAdjectives.txt
      try {
@@ -57,7 +58,34 @@ public class Review {
     catch(Exception e){
       System.out.println("Error reading or parsing negativeAdjectives.txt");
     }   
+    
+   //read in the gay adjectives in gayreview.txt
+   try {
+    Scanner input = new Scanner(new File("gayreview.txt"));
+    while(input.hasNextLine()){
+      String temp = input.nextLine().trim();
+      System.out.println(temp);
+      gayreview.add(temp);
+    }
+    input.close();
   }
+  catch(Exception e){
+    System.out.println("Error reading or parsing gayreview.txt\n" + e);
+  }  
+
+   //read in the straight adjectives in straightreview.txt
+   try {
+    Scanner input = new Scanner(new File("straightreview.txt"));
+    while(input.hasNextLine()){
+      String temp = input.nextLine().trim();
+      System.out.println(temp);
+      straightreview.add(temp);
+    }
+    input.close();
+  }
+  catch(Exception e){
+    System.out.println("Error reading or parsing straightreview.txt\n" + e);
+  }  
   
   /** 
    * returns a string containing all of the text in fileName (including punctuation), 
@@ -97,7 +125,95 @@ public class Review {
       return 0;
     }
   }
+
+
+
+  public static double totalSentiment(String fileName)
+  {
+    String review = textToString(fileName);
+    double total = 0.0;
+
+    while (review.indexOf(" ") > 0)
+    {
+      int space = review.indexOf(" ");
+      String word = review.substring(0, space);
+      double sentiment = sentimentVal(word);
+      total += sentiment;
+      
+      review = review.substring(space + 1);
+    }
+    
+    total += sentimentVal(review);
+    return total;
+  }
   
+  public static int StarRating (String fileName){
+    double sentiment = totalSentiment(fileName);
+    if (sentiment > 21){
+      return 5;
+    }else if (sentiment > 11){
+      return 4;
+    }else if (sentiment > 0){
+      return 3;
+    }else if (sentiment > -10){
+      return 2;
+    }else{
+      return 1;
+    }
+  }
+
+    public static String randomgayreview ()
+      {
+        int index = (int)(Math.random() * gayreview.size());
+        return gayreview.get(index);
+      }
+    public static String randomstraightreview ()
+      {
+        int index = (int)(Math.random() * straightreview.size());
+        return straightreview.get(index);
+      }
+    public static String gayReview(String fileName){
+
+      System.out.println("Would you like a gay or straight review?");
+      Scanner sc = new Scanner(System.in);
+      String homoHetero = sc.nextLine();
+
+      //get the review in a string
+      String review = textToString(fileName);
+  
+      //empty string for new review
+      String newReview = "";
+  
+      //loop through the string
+      while (review.indexOf("*")>0 && review.length()>0)
+      {
+        //look for *, 
+        int starLoc = review.indexOf("*");
+          //add everything before the * to new review
+        newReview += review.substring(0, starLoc);
+        //add a random adjective to new review
+        if (homoHetero.toLowerCase().equals("gay")){
+          newReview += randomgayreview();
+        }
+        else if (homoHetero.toLowerCase().equals("straight")){
+          newReview += randomstraightreview();
+        }
+        else {
+          newReview += randomAdjective();
+        }
+        //cut off old review through starred adjective
+        int spaceAfterStar = review.indexOf(" ", starLoc);
+        review = review.substring(spaceAfterStar);
+  
+      //   System.out.println("__");
+      //   System.out.println(newReview);
+  
+      }
+      newReview += review;
+      System.out.println(newReview);
+      return newReview;
+    }  
+
   /**
    * Returns the ending punctuation of a string, or the empty string if there is none 
    */
